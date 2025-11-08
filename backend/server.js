@@ -6,6 +6,10 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const allowedEnvKeys = ('BOT_TOKEN,GUILD_ID')
+    .split(',')
+    .map((key) => key.trim())
+    .filter((key) => key.length > 0);
 
 // Middleware
 app.use(cors());
@@ -216,6 +220,42 @@ app.put('/api/requests/reorder', (req, res) => {
             console.error('Error updating request order:', err.message);
             res.status(500).json({ error: 'Failed to update request order' });
         });
+});
+
+// Check if an environment variable exists (and is not null/undefined)
+app.get('/api/env/:key/exists', (req, res) => {
+    const { key } = req.params;
+
+    if (!allowedEnvKeys.includes(key)) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const value = process.env[key];
+    const exists = value !== undefined && value !== null;
+
+    res.json({ key, exists });
+});
+
+// Set an environment variable value
+app.post('/api/env/:key', (req, res) => {
+    const { key } = req.params;
+    const { value } = req.body;
+
+    if (!allowedEnvKeys.includes(key)) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    if (value === undefined || value === null) {
+        return res.status(400).json({ error: 'Value is required' });
+    }
+
+    if (typeof value !== 'string') {
+        return res.status(400).json({ error: 'Value must be a string' });
+    }
+
+    process.env[key] = value;
+
+    res.json({ key, value });
 });
 
 // Health check endpoint

@@ -10,6 +10,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveNameBtn = document.getElementById('save-name-btn');
     const editNameBtn = document.getElementById('edit-name-btn');
     const userNameSpan = document.getElementById('user-name');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const botTokenStatus = document.getElementById('bot-token-status');
+    const guildIdStatus = document.getElementById('guild-id-status');
+    const botTokenInput = document.getElementById('bot-token-input');
+    const guildIdInput = document.getElementById('guild-id-input');
+    const saveEnvBtn = document.getElementById('save-env-btn');
+    const cancelEnvBtn = document.getElementById('cancel-env-btn');
     
     // API base URL
     const API_BASE_URL = 'http://192.168.1.85:3001/api';
@@ -35,6 +43,133 @@ document.addEventListener('DOMContentLoaded', function() {
         input.classList.remove('error');
         errorElement.textContent = '';
         errorElement.classList.remove('show');
+    }
+
+    function setEnvStatus(element, key, state) {
+        element.classList.remove('status-loading', 'status-set', 'status-missing', 'status-error');
+
+        if (state === 'loading') {
+            element.textContent = `Checking ${key}...`;
+            element.classList.add('status-loading');
+            return;
+        }
+
+        if (state === 'set') {
+            element.textContent = `${key} is set`;
+            element.classList.add('status-set');
+            return;
+        }
+
+        if (state === 'missing') {
+            element.textContent = `${key} is not set`;
+            element.classList.add('status-missing');
+            return;
+        }
+
+        element.textContent = `Unable to determine ${key}`;
+        element.classList.add('status-error');
+    }
+
+    async function refreshEnvStatus(key, element) {
+        setEnvStatus(element, key, 'loading');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/env/${key}/exists`);
+            if (!response.ok) {
+                throw new Error(`Failed to check ${key}`);
+            }
+
+            const data = await response.json();
+            setEnvStatus(element, key, data.exists ? 'set' : 'missing');
+        } catch (error) {
+            console.error(`Error checking ${key}:`, error);
+            setEnvStatus(element, key, 'error');
+        }
+    }
+
+    async function loadEnvStatuses() {
+        await Promise.all([
+            refreshEnvStatus('BOT_TOKEN', botTokenStatus),
+            refreshEnvStatus('GUILD_ID', guildIdStatus)
+        ]);
+    }
+
+    async function setEnvValue(key, value) {
+        const response = await fetch(`${API_BASE_URL}/env/${key}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ value })
+        });
+
+        if (!response.ok) {
+            let message = `Failed to update ${key}`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.error) {
+                    message = errorData.error;
+                }
+            } catch (err) {
+                const text = await response.text();
+                if (text) {
+                    message = text;
+                }
+            }
+            throw new Error(message);
+        }
+    }
+
+    function openSettingsModal() {
+        isUserInteracting = true;
+        settingsModal.style.display = 'block';
+        botTokenInput.value = '';
+        guildIdInput.value = '';
+        loadEnvStatuses();
+    }
+
+    function closeSettingsModal() {
+        settingsModal.style.display = 'none';
+        botTokenInput.value = '';
+        guildIdInput.value = '';
+        isUserInteracting = false;
+    }
+
+    async function saveEnvSettings() {
+        const updates = [];
+        const botTokenValue = botTokenInput.value.trim();
+        const guildIdValue = guildIdInput.value.trim();
+
+        if (!botTokenValue && !guildIdValue) {
+            alert('Please enter a value for at least one variable before saving.');
+            return;
+        }
+
+        if (botTokenValue) {
+            updates.push(setEnvValue('BOT_TOKEN', botTokenValue));
+        }
+
+        if (guildIdValue) {
+            updates.push(setEnvValue('GUILD_ID', guildIdValue));
+        }
+
+        saveEnvBtn.disabled = true;
+        const previousText = saveEnvBtn.textContent;
+        saveEnvBtn.textContent = 'Saving...';
+
+        try {
+            await Promise.all(updates);
+            await loadEnvStatuses();
+            botTokenInput.value = '';
+            guildIdInput.value = '';
+            alert('Environment variables updated successfully.');
+        } catch (error) {
+            console.error('Error saving environment variables:', error);
+            alert(error.message || 'Failed to save environment variables. Please try again.');
+        } finally {
+            saveEnvBtn.disabled = false;
+            saveEnvBtn.textContent = previousText;
+        }
     }
     
     // Function to add a new request
@@ -567,6 +702,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Event listeners
+    settingsBtn.addEventListener('click', openSettingsModal);
+    cancelEnvBtn.addEventListener('click', function() {
+        closeSettingsModal();
+    });
+    settingsModal.addEventListener('click', function(e) {
+        if (e.target === settingsModal) {
+            closeSettingsModal();
+        }
+    });
+    saveEnvBtn.addEventListener('click', saveEnvSettings);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && settingsModal.style.display === 'block') {
+            closeSettingsModal();
+        }
+    });
+
     submitBtn.addEventListener('click', function() {
         addRequest(requestInput.value, priorityCheckbox.checked);
     });

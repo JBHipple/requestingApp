@@ -62,6 +62,127 @@ body {
     border-color: #d2691e;
 }
 
+.settings-modal-content {
+    max-width: 480px;
+}
+
+.env-status-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.env-status {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-align: center;
+    background-color: #f5f5f5;
+    color: #555;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.env-status.status-loading {
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.env-status.status-set {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.env-status.status-missing {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.env-status.status-error {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.env-input-group {
+    margin-bottom: 20px;
+}
+
+.env-input-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.env-input-group input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.env-input-group input:focus {
+    outline: none;
+    border-color: #d2691e;
+}
+
+.settings-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.settings-buttons button {
+    min-width: 100px;
+}
+
+.settings-buttons .secondary {
+    background-color: #6c757d;
+}
+
+.settings-buttons .secondary:hover {
+    background-color: #5a6268;
+}
+
+.settings-buttons .secondary:active {
+    transform: translateY(1px);
+}
+
+.top-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.settings-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #d2691e;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.settings-btn svg {
+    display: block;
+}
+
+.settings-btn:hover {
+    background-color: #b8860b;
+    transform: translateY(-1px);
+}
+
+.settings-btn:active {
+    transform: translateY(0);
+}
+
 .modal-buttons {
     text-align: center;
 }
@@ -80,6 +201,14 @@ body {
 
 .modal-buttons button:hover {
     background-color: #b8860b;
+}
+
+.modal-buttons .secondary {
+    background-color: #6c757d;
+}
+
+.modal-buttons .secondary:hover {
+    background-color: #5a6268;
 }
 
 @keyframes fadeIn {
