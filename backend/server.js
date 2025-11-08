@@ -3,13 +3,59 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const allowedEnvKeys = ('BOT_TOKEN,GUILD_ID')
+const allowedEnvKeys = ('BOT_TOKEN,GUILD_ID,DISCORD_CHANNEL_ID')
     .split(',')
     .map((key) => key.trim())
     .filter((key) => key.length > 0);
+const DISCORD_API_BASE = 'https://discord.com/api/v10';
+
+async function sendDiscordNotification({ text, submittedBy, priority, year, type }) {
+    const botToken = process.env.BOT_TOKEN;
+    const channelId = process.env.DISCORD_CHANNEL_ID;
+
+    if (!botToken || !channelId) {
+        console.warn('Discord notification skipped: BOT_TOKEN or DISCORD_CHANNEL_ID not set.');
+        return;
+    }
+
+    const lines = [
+        '📬 **New Request Added**',
+        `**Requested by:** ${submittedBy || 'Unknown'}`,
+        `**Request:** ${text}`
+    ];
+
+    if (type) {
+        lines.push(`**Type:** ${type}`);
+    }
+
+    if (year) {
+        lines.push(`**Year:** ${year}`);
+    }
+
+    lines.push(`**Priority:** ${priority ? 'Yes' : 'No'}`);
+
+    const messagePayload = {
+        content: lines.join('\n')
+    };
+
+    const response = await fetch(`${DISCORD_API_BASE}/channels/${channelId}/messages`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bot ${botToken}`
+        },
+        body: JSON.stringify(messagePayload)
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Discord API responded with ${response.status}: ${errorText}`);
+    }
+}
 
 // Middleware
 app.use(cors());
@@ -117,6 +163,16 @@ app.post('/api/requests', (req, res) => {
             console.error('Error creating request:', err.message);
             res.status(500).json({ error: 'Failed to create request' });
         } else {
+            sendDiscordNotification({
+                text: text.trim(),
+                submittedBy,
+                priority,
+                year,
+                type
+            }).catch((notificationError) => {
+                console.error('Failed to send Discord notification:', notificationError.message);
+            });
+
             res.status(201).json({ 
                 rowId: this.lastID,
                 message: 'Request created successfully' 

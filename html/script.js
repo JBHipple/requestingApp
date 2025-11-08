@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const guildIdStatus = document.getElementById('guild-id-status');
     const botTokenInput = document.getElementById('bot-token-input');
     const guildIdInput = document.getElementById('guild-id-input');
+    const discordChannelStatus = document.getElementById('discord-channel-status');
+    const discordChannelInput = document.getElementById('discord-channel-input');
     const saveEnvBtn = document.getElementById('save-env-btn');
     const cancelEnvBtn = document.getElementById('cancel-env-btn');
     
@@ -90,7 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadEnvStatuses() {
         await Promise.all([
             refreshEnvStatus('BOT_TOKEN', botTokenStatus),
-            refreshEnvStatus('GUILD_ID', guildIdStatus)
+            refreshEnvStatus('GUILD_ID', guildIdStatus),
+            refreshEnvStatus('DISCORD_CHANNEL_ID', discordChannelStatus)
         ]);
     }
 
@@ -125,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
         settingsModal.style.display = 'block';
         botTokenInput.value = '';
         guildIdInput.value = '';
+        discordChannelInput.value = '';
         loadEnvStatuses();
     }
 
@@ -132,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
         settingsModal.style.display = 'none';
         botTokenInput.value = '';
         guildIdInput.value = '';
+        discordChannelInput.value = '';
         isUserInteracting = false;
     }
 
@@ -139,8 +144,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const updates = [];
         const botTokenValue = botTokenInput.value.trim();
         const guildIdValue = guildIdInput.value.trim();
+        const discordChannelValue = discordChannelInput.value.trim();
 
-        if (!botTokenValue && !guildIdValue) {
+        if (!botTokenValue && !guildIdValue && !discordChannelValue) {
             alert('Please enter a value for at least one variable before saving.');
             return;
         }
@@ -153,6 +159,10 @@ document.addEventListener('DOMContentLoaded', function() {
             updates.push(setEnvValue('GUILD_ID', guildIdValue));
         }
 
+        if (discordChannelValue) {
+            updates.push(setEnvValue('DISCORD_CHANNEL_ID', discordChannelValue));
+        }
+
         saveEnvBtn.disabled = true;
         const previousText = saveEnvBtn.textContent;
         saveEnvBtn.textContent = 'Saving...';
@@ -162,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
             await loadEnvStatuses();
             botTokenInput.value = '';
             guildIdInput.value = '';
+            discordChannelInput.value = '';
             alert('Environment variables updated successfully.');
         } catch (error) {
             console.error('Error saving environment variables:', error);
