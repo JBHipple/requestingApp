@@ -150,12 +150,6 @@ body {
     transform: translateY(1px);
 }
 
-.top-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-}
-
 .settings-btn {
     display: inline-flex;
     align-items: center;
@@ -254,9 +248,10 @@ body {
 .greeting-section {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     margin-bottom: 20px;
     position: relative;
+    gap: 10px;
 }
 
 .greeting-section h1 {
@@ -288,6 +283,12 @@ body {
 
 .edit-name-btn:active {
     transform: scale(0.95);
+}
+
+.greeting-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .container {
