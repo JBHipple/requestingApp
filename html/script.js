@@ -241,6 +241,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.status === 409) {
                 const data = await response.json().catch(() => ({}));
                 showError(requestInput, 'request-input-error', data.error || 'This request already exists for that year.');
+                requestInput.value = '';
+                yearInput.value = '';
+                typeSelect.value = '';
+                priorityCheckbox.checked = false;
                 return;
             }
 
