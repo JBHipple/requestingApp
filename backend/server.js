@@ -153,31 +153,55 @@ app.post('/api/requests', (req, res) => {
         return res.status(400).json({ error: 'Text and submittedBy are required' });
     }
 
-    const query = `
-        INSERT INTO requests (RequestText, SubmittedBy, Status, Priority, SortOrder, Year, Type)
-        VALUES (?, ?, 'pending', ?, ?, ?, ?)
+    const checkQuery = `
+        SELECT rowId
+        FROM requests
+        WHERE LOWER(RequestText) = LOWER(?)
+          AND (
+              (Year IS NULL AND ? IS NULL)
+              OR Year = ?
+          )
     `;
-    
-    db.run(query, [text, submittedBy, priority ? 1 : 0, sortOrder, year, type], function(err) {
-        if (err) {
-            console.error('Error creating request:', err.message);
-            res.status(500).json({ error: 'Failed to create request' });
-        } else {
-            sendDiscordNotification({
-                text: text.trim(),
-                submittedBy,
-                priority,
-                year,
-                type
-            }).catch((notificationError) => {
-                console.error('Failed to send Discord notification:', notificationError.message);
-            });
 
-            res.status(201).json({ 
-                rowId: this.lastID,
-                message: 'Request created successfully' 
-            });
+    const normalizedText = text.trim();
+    const normalizedYear = typeof year === 'number' ? year : null;
+
+    db.get(checkQuery, [normalizedText, normalizedYear, normalizedYear], (checkErr, existing) => {
+        if (checkErr) {
+            console.error('Error checking for duplicate request:', checkErr.message);
+            return res.status(500).json({ error: 'Failed to verify request uniqueness' });
         }
+
+        if (existing) {
+            return res.status(409).json({ error: 'A request with the same name and year already exists.' });
+        }
+
+        const insertQuery = `
+            INSERT INTO requests (RequestText, SubmittedBy, Status, Priority, SortOrder, Year, Type)
+            VALUES (?, ?, 'pending', ?, ?, ?, ?)
+        `;
+
+        db.run(insertQuery, [normalizedText, submittedBy, priority ? 1 : 0, sortOrder, normalizedYear, type], function(err) {
+            if (err) {
+                console.error('Error creating request:', err.message);
+                res.status(500).json({ error: 'Failed to create request' });
+            } else {
+                sendDiscordNotification({
+                    text: normalizedText,
+                    submittedBy,
+                    priority,
+                    year: normalizedYear,
+                    type
+                }).catch((notificationError) => {
+                    console.error('Failed to send Discord notification:', notificationError.message);
+                });
+
+                res.status(201).json({ 
+                    rowId: this.lastID,
+                    message: 'Request created successfully' 
+                });
+            }
+        });
     });
 });
 

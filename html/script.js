@@ -238,6 +238,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             });
             
+            if (response.status === 409) {
+                const data = await response.json().catch(() => ({}));
+                showError(requestInput, 'request-input-error', data.error || 'This request already exists for that year.');
+                return;
+            }
+
             if (!response.ok) {
                 throw new Error('Failed to create request');
             }
