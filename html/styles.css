@@ -248,10 +248,9 @@ body {
 .greeting-section {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     margin-bottom: 20px;
     position: relative;
-    gap: 10px;
 }
 
 .greeting-section h1 {
@@ -289,6 +288,22 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.settings-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.settings-btn:hover {
+    background-color: #b8860b;
+    transform: translateY(calc(-50% - 1px));
+}
+
+.settings-btn:active {
+    transform: translateY(calc(-50% + 1px));
 }
 
 .container {
