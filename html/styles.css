@@ -183,6 +183,40 @@ body {
     transform: translateY(0);
 }
 
+.scroll-top-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: #d2691e;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+    pointer-events: none;
+    z-index: 900;
+}
+
+.scroll-top-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.scroll-top-btn:hover {
+    background-color: #b8860b;
+}
+
+.scroll-top-btn:active {
+    transform: translateY(2px);
+}
+
 .modal-buttons {
     text-align: center;
 }

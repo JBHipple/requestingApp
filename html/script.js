@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const guildIdInput = document.getElementById('guild-id-input');
     const discordChannelStatus = document.getElementById('discord-channel-status');
     const discordChannelInput = document.getElementById('discord-channel-input');
+    const scrollTopBtn = document.getElementById('scroll-top-btn');
     const saveEnvBtn = document.getElementById('save-env-btn');
     const cancelEnvBtn = document.getElementById('cancel-env-btn');
     
@@ -711,6 +712,15 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshInterval = null;
         }
     }
+
+    function updateScrollTopVisibility() {
+        if (!scrollTopBtn) return;
+        if (window.scrollY > 200) {
+            scrollTopBtn.classList.add('visible');
+        } else {
+            scrollTopBtn.classList.remove('visible');
+        }
+    }
     
     // Event listeners
     settingsBtn.addEventListener('click', openSettingsModal);
@@ -821,4 +831,12 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('beforeunload', () => {
         stopAutoRefresh();
     });
+
+    if (scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        window.addEventListener('scroll', updateScrollTopVisibility);
+        updateScrollTopVisibility();
+    }
 });
