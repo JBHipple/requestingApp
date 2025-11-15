@@ -306,6 +306,38 @@ body {
     transform: translateY(calc(-50% + 1px));
 }
 
+.service-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.service-btn {
+    display: inline-block;
+    background-color: #d2691e;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-align: center;
+}
+
+.service-btn:hover {
+    background-color: #b8860b;
+    transform: translateY(-1px);
+}
+
+.service-btn:active {
+    transform: translateY(0);
+}
+
 .container {
     display: flex;
     justify-content: center;
@@ -330,6 +362,18 @@ body {
     
     .greeting-section h1 {
         font-size: 20px;
+    }
+    
+    .service-buttons {
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .service-btn {
+        padding: 8px 16px;
+        font-size: 12px;
+        flex: 1 1 calc(50% - 4px);
+        min-width: 0;
     }
     
     .input-section {
